@@ -10,54 +10,49 @@ import { fetchNotes } from "../../services/noteService";
 import type { Note } from "../../types/note";
 import Pagination from "../Pagination/Pagination";
 
-interface FetchNoteResponse {
+interface FetchNotesResponse {
   notes: Note[];
-  total: number;
-  page: number;
-  perPage: number;
+  totalPages: number;
 }
 
 export default function App() {
-
   const [isModalOpen, setModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm] = useDebounce(searchTerm, 500);
   const perPage = 12;
 
+
   useEffect(() => {
     setPage(1);
   }, [debouncedSearchTerm]);
 
-  const { data, isLoading } = useQuery<FetchNoteResponse>({
+  const { data, isLoading } = useQuery<FetchNotesResponse>({
     queryKey: ["notes", page, debouncedSearchTerm],
     queryFn: () => fetchNotes(page, perPage, debouncedSearchTerm),
     placeholderData: keepPreviousData,
   });
 
-
   const openModal = () => setModalOpen(true);
   const closeModal = () => setModalOpen(false);
-
 
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
         <button onClick={openModal} className={css.submitButton}>
-          Create Note
+          Create Note +
         </button>
         <SearchBox value={searchTerm} onChange={setSearchTerm} />
       </header>
 
       {isLoading && <strong className={css.loading}>Loading notes...</strong>}
 
-      {data && data.notes.length > 0 && (
-        <NoteList notes={data.notes} />
-      )}
+      {data && data.notes.length > 0 && <NoteList notes={data.notes} />}
 
-      {data && data.total > perPage && (
+    
+      {data && data.totalPages > 1 && (
         <Pagination
-          pageCount={Math.ceil(data.total / perPage)}
+          pageCount={data.totalPages}
           currentPage={page}
           onPageChange={setPage}
         />

@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Note, NewNoteData } from "../types/note";
 
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFvcDE2MDNAZ21haWwuY29tIiwiaWF0IjoxNzUzNTQ2NTQzfQ.LYxMZuV2Tpllo6VtbmOeKKwVgDQuCiJ95G12z1iDSMY";
+const token = import.meta.env.VITE_NOTEHUB_TOKEN;
 
 const instance = axios.create({
   baseURL: "https://notehub-public.goit.study/api",
@@ -12,10 +12,9 @@ const instance = axios.create({
 
 interface FetchNotesResponse {
   notes: Note[];
-  total: number;
-  page: number;
-  perPage: number;
+  totalPages: number;
 }
+
 
 export const fetchNotes = async (
   page = 1,
@@ -30,18 +29,22 @@ export const fetchNotes = async (
   const res = await instance.get<FetchNotesResponse>("/notes", {
     params,
   });
+
   return res.data;
 };
+
 
 export const addNote = async (newNote: NewNoteData): Promise<Note> => {
   const res = await instance.post<Note>("/notes", newNote);
   return res.data;
 };
 
-export const deleteNote = async (id: string): Promise<Note> => {
+
+export const deleteNote = async (id: string | number): Promise<Note> => {
   const res = await instance.delete<Note>(`/notes/${id}`);
   return res.data;
 };
+
 
 export interface NoteFormProps {
   onClose: () => void;
